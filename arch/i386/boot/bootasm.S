@@ -86,7 +86,7 @@ protcseg:
 .p2align 2
 gdt:
     SEG_NULLASM
-    SEG_ASM(STA_X|STA_R, 0x0, 0xffffffff)
+    SEG_ASM(STA_X|STA_R, 0x00, 0xffffffff)
     SEG_ASM(STA_W, 0x0, 0xffffffff)                 # data seg for bootloader and kernel
 
 gdtdesc:

@@ -73,7 +73,9 @@ match = $(shell echo $(2) | $(AWK) '{for(i=1;i<=NF;i++){if(match("$(1)","^"$$(i)
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # include kernel/user
 
-INCLUDE	+= libs/
+INCLUDE	+= libs/ \
+		   arch/i386/inc
+
 
 CFLAGS	+= $(addprefix -I,$(INCLUDE))
 
@@ -87,7 +89,8 @@ $(call add_files_cc,$(call listf_cc,$(LIBDIR)),libs,)
 KINCLUDE	+= arch/i386/debug/ \
 			   arch/i386/driver/ \
 			   arch/i386/trap \
-			   arch/i386/mm/
+			   arch/i386/mm/ \
+			   arch/i386/inc/
 
 KSRCDIR		+= init \
 			   libs \

@@ -88,10 +88,13 @@ $(call add_files_cc,$(call listf_cc,$(LIBDIR)),libs,)
 # kernel
 
 KINCLUDE	+= include/ \
+			   kernel/debug
 
-KSRCDIR		+= libs \
-			   init \
-			   kernel/driver
+#首先编译init, 这样链接的时候首先链接它, 也就是将它放到0x100000的位置
+KSRCDIR		+= init \
+			   kernel/driver \
+			   libs \
+			   kernel/debug
 
 
 KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
@@ -180,13 +183,14 @@ TARGETS: $(TARGETS)
 QEMU := qemu-system-i386
 .PHONY: qemu qemu-nox debug debug-nox
 qemu: $(XOSIMG)
-	$(V)$(QEMU) -parallel stdio -hda $< -serial null
+	#$(V)$(QEMU) -parallel stdio -hda $< -serial null
+	$(V)$(QEMU) -serial stdio -hda $< 
 
 qemu-nox: $(XOSIMG)
 	$(V)$(QEMU) -serial mon:stdio -hda $< -nographic
 TERMINAL        :=gnome-terminal
 debug: $(XOSIMG)
-	$(V)$(QEMU) -S -s -parallel stdio -hda $< -serial null &
+	$(V)$(QEMU) -S -s -serial stdio -hda $< &
 	$(V)sleep 2
 	#$(V)$(TERMINAL) -e "gdb -q -tui -x tools/gdbinit"
 

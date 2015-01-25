@@ -76,6 +76,7 @@ protcseg:
     movw    %ax, %gs                # -> GS
     movw    %ax, %ss                # -> SS: Stack Segment 堆栈段寄存器 指向包含当前程序栈的段
     #设置栈指针，并且调用c函数
+    movl 0 , %ebp
     movl $start, %esp
     call boot_main
 

@@ -8,4 +8,4 @@ a little os
     * 在gdb下加载obj, `file ./obj/***` 
     * `target remote :1234` 连接qemu 就可以调试了.
 
-1. arch/i386 放置i386相关代码， boot 引导程序
+1. boot 引导程序 ; init 存放kernel的最初代码; kernel存放驱动; libs是一些库(比如string, printf); mm 是内存相关

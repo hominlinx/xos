@@ -25,14 +25,15 @@ struct elfhdr {
 
 /* program section header */
 //程序头表
+//程序头表告诉系统如何建立一个进程映像．它是从加载执行的角度来看待elf文件．从它的角度看．elf文件被分成许多段，elf文件中的代码、链接信息和注释都以段的形式存放。每个段都在程序头表中有一个表项描述，包含以下属性：段的类型，段的驻留位置相对于文件开始处的偏移，段在内存中的首字节地址，段的物理地址，段在文件映像中的字节数．段在内存映像中的字节数，段在内存和文件中的对齐标记。可用"readelf -l filename"察看程序头表中的内容。程序头表的结构如下：
 struct proghdr {
-    uint32_t p_type;   // loadable code or data, dynamic linking info,etc.
-    uint32_t p_offset; // file offset of segment
-    uint32_t p_va;     // virtual address to map segment
-    uint32_t p_pa;     // physical address, not used
-    uint32_t p_filesz; // size of segment in file
-    uint32_t p_memsz;  // size of segment in memory (bigger if contains bss）
-    uint32_t p_flags;  // read/write/execute bits
-    uint32_t p_align;  // required alignment, invariably hardware page size
+    uint32_t p_type;   // loadable code or data, dynamic linking info,etc.段的类型 
+    uint32_t p_offset; // file offset of segment, 段的位置相对于文件开始处的偏移
+    uint32_t p_va;     // virtual address to map segment , 段在内存中的首字节地址 
+    uint32_t p_pa;     // physical address, not used, 段的物理地址 
+    uint32_t p_filesz; // size of segment in file, 段在文件映像中的字节数 
+    uint32_t p_memsz;  // size of segment in memory (bigger if contains bss）, 段在内存映像中的字节数 
+    uint32_t p_flags;  // read/write/execute bits, 段的标记 
+    uint32_t p_align;  // required alignment, invariably hardware page size , 段在内存中的对齐标记 
 };
 #endif

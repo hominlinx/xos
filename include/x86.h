@@ -35,6 +35,7 @@ static inline void sti(void) __attribute__((always_inline));
 static inline void cli(void) __attribute__((always_inline));
 static inline void ltr(uint16_t sel) __attribute__((always_inline));
 
+//读一个port的data
 static inline uint8_t
 inb(uint16_t port) {
     uint8_t data;
@@ -69,6 +70,7 @@ read_ebp(void) {
     return ebp;
 }
 
+//操作lidt
 static inline void
 lidt(struct pseudodesc *pd) {
     asm volatile ("lidt (%0)" :: "r" (pd));

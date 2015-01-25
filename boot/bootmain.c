@@ -78,9 +78,9 @@ int boot_main(void)
 
     // load each program segment (ignores ph flags)
     //找到第一程序头表项的起始地址
-    ph = (struct proghdr *)((uintptr_t)ELFHDR + ELFHDR->e_phoff);
+    ph = (struct proghdr *)((uintptr_t)ELFHDR + ELFHDR->e_phoff); // 0x10034
     //程序头表的结束位置
-    eph = ph + ELFHDR->e_phnum;
+    eph = ph + ELFHDR->e_phnum; //ELFHDR->e_phnum 表示程序头表的数目
     //将内核加载进入内存
     for (; ph < eph; ph ++) {
         //p_pa就是该程序段应该加载到内存中的位置

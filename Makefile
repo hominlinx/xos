@@ -74,43 +74,45 @@ match = $(shell echo $(2) | $(AWK) '{for(i=1;i<=NF;i++){if(match("$(1)","^"$$(i)
 # include kernel/user
 
 INCLUDE	+= libs/ \
-		   arch/i386/inc
+		   include/
 
 
 CFLAGS	+= $(addprefix -I,$(INCLUDE))
 
-LIBDIR	+= libs
+#LIBDIR	+= libs
+LIBDIR	= 
 
 $(call add_files_cc,$(call listf_cc,$(LIBDIR)),libs,)
 
 # -------------------------------------------------------------------
 # kernel
 
-KINCLUDE	+= arch/i386/debug/ \
-			   arch/i386/driver/ \
-			   arch/i386/trap \
-			   arch/i386/mm/ \
-			   arch/i386/inc/
+KINCLUDE	+= include/ \
 
-KSRCDIR		+= init \
-			   libs \
-			   arch/i386/debug \
-			   arch/i386/driver \
-			   arch/i386/trap \
-			   arch/i386/mm
+KSRCDIR		+= libs \
+			   init \
+			   kernel/driver
+
 
 KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
 
-$(call add_files_cc,$(call listf_cc,$(KSRCDIR)),kernel,$(KCFLAGS))
+#列出KSRCDIR 中的cc
+#call 创建新的参数话函数, listf_cc 就是这个call的返回值,返回给KCC
+KCC = $(call listf_cc, $(KSRCDIR))
+#$(call add_files_cc,$(call listf_cc, $(KSRCDIR)), kernel,$(KCFLAGS))
+$(call add_files_cc,$(KCC), kernel,$(KCFLAGS))
 
 KOBJS	= $(call read_packet,kernel libs)
 
+CCC = $(call packetname, kernel libs)
+CCCC = $(foreach p,$(CCC),$($(p)))
 # create kernel target
 kernel = $(call totarget,kernel)
 
 #$(kernel): tools/kernel.ld
 
 $(kernel): $(KOBJS)
+	@echo add_files_cc:$(add_files_cc) , KCC:$(KCC) , $(CCCC) -- $(CCC)
 	@echo Hominlinx $(KOBJS)
 	@echo + ld $@
 	$(V)$(LD) $(LDFLAGS) -T tools/kernel.ld -o $@ $(KOBJS)
@@ -122,7 +124,7 @@ $(call create_target,kernel)
 # -------------------------------------------------------------------
 
 # create bootblock
-bootfiles = $(call listf_cc,arch/i386/boot)
+bootfiles = $(call listf_cc,boot)
 $(foreach f,$(bootfiles),$(call cc_compile,$(f),$(CC),$(CFLAGS) -Os -nostdinc))
 
 bootblock = $(call totarget,bootblock)

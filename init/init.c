@@ -11,9 +11,13 @@ void kernel_init(void)
 {
     cons_init();
     //cons_putc('c', rc_black, rc_green);
-    cprintf("hominlinx %s", "and shelly");
     print_kerninfo();
-    grade_backtrace();
+    //grade_backtrace();
+    //初始化物理内存管理
+    pmm_init();
+    //中断初始化
+    pic_init();
+    cprintf("hominlinx %s", "and shelly");
     while(1);
 }
 

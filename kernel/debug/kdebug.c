@@ -309,5 +309,25 @@ print_stackframe(void) {
       *           NOTICE: the calling funciton's return addr eip  = ss:[ebp+4]
       *                   the calling funciton's ebp = ss:[ebp]
       */
+    /* 栈从高地址向低地址发展， 所以在这个函数中，ebp 的上一个位置是保存函数返回地址，上一个的上一个地址保存了参数， ebp指向的地址保存了上一个函数的ebp。
+     */
+    uint32_t ebp = read_ebp();
+    uint32_t eip = read_eip();
+    int i = 0;
+    int j = 0;
+    for(i = 0; ebp != 0 && i < STACKFRAME_DEPTH; ++i)
+    {
+        cprintf("ebp=0x%08x, eip=0x%08x\n", ebp, eip);
+        uint32_t *arg = (uint32_t*)ebp +2;
+        //打印四个参数
+        cprintf("args: ");
+        for (j = 0; j < 4; ++j) {
+            cprintf(" 0x%08x===",arg[j]);
+        }
+        cprintf("\n");
+        print_debuginfo(eip - 1);
+        eip = *((uint32_t*)ebp +1);
+        ebp = *((uint32_t*)ebp);
+    }
 }
 

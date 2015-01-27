@@ -24,6 +24,7 @@ static inline void outb(uint16_t port, uint8_t data) __attribute__((always_inlin
 static inline void outw(uint16_t port, uint16_t data) __attribute__((always_inline));
 static inline uint32_t read_ebp(void) __attribute__((always_inline));
 
+//48bit 不要进行对齐优化
 /* Pseudo-descriptors used for LGDT, LLDT(not used) and LIDT instructions. */
 struct pseudodesc {
     uint16_t pd_lim;        // Limit

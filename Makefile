@@ -88,13 +88,15 @@ $(call add_files_cc,$(call listf_cc,$(LIBDIR)),libs,)
 # kernel
 
 KINCLUDE	+= include/ \
-			   kernel/debug
+			   kernel/debug \
+			   kernel/trap
 
 #首先编译init, 这样链接的时候首先链接它, 也就是将它放到0x100000的位置
 KSRCDIR		+= init \
 			   kernel/driver \
 			   libs \
-			   kernel/debug
+			   kernel/debug \
+			   kernel/trap
 
 
 KCFLAGS		+= $(addprefix -I,$(KINCLUDE))

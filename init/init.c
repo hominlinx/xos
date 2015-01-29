@@ -17,6 +17,10 @@ void kernel_init(void)
     pmm_init();
     //中断初始化
     pic_init();
+    //中断描述符初始化
+    idt_init();
+    clock_init();
+    intr_enable();
     cprintf("hominlinx %s", "and shelly");
     while(1);
 }

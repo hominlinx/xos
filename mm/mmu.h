@@ -68,6 +68,7 @@ struct gatedesc {
  *          for software to invoke this interrupt/trap gate explicitly
  *          using an int instruction.
  * */
+//设置门描述符 暂时为两种门
 #define SETGATE(gate, istrap, sel, off, dpl) {            \
     (gate).gd_off_15_0 = (uint32_t)(off) & 0xffff;        \
     (gate).gd_ss = (sel);                                \

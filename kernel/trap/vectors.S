@@ -157,7 +157,7 @@ vector31:
 vector32:
   pushl $0
   pushl $32
-  jmp __alltraps
+  #jmp __alltraps
 .globl vector33
 vector33:
   pushl $0

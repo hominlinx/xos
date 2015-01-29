@@ -1,7 +1,7 @@
 #ifndef __KERN_TRAP_TRAP_H__
 #define __KERN_TRAP_TRAP_H__
 
-#include <defs.h>
+#include <picirq.h>
 
 /* Trap Numbers */
 
@@ -30,8 +30,7 @@
 #define T_SYSCALL               0x80 // SYSCALL, ONLY FOR THIS PROJ
 
 /* Hardware IRQ numbers. We receive these as (IRQ_OFFSET + IRQ_xx) */
-#define IRQ_OFFSET                32    // IRQ 0 corresponds to int IRQ_OFFSET
-
+//中断号, 一共15个中断请求号:IRQ0-IRQ15(因为IRQ2是级联的)
 #define IRQ_TIMER                0
 #define IRQ_KBD                    1
 #define IRQ_COM1                4

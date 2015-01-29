@@ -1,4 +1,4 @@
-##include <memlayout.h>
+#include <memlayout.h>
 
 # vectors.S sends all traps here.
 .text
@@ -13,7 +13,7 @@ __alltraps:
     pushal
 
     # load GD_KDATA into %ds and %es to set up data segments for kernel
-   # movl $GD_KDATA, %eax
+    movl $GD_KDATA, %eax
     movw %ax, %ds
     movw %ax, %es
 

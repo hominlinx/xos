@@ -1,6 +1,6 @@
 #include <defs.h>
-//#include <mmu.h>
-//#include <memlayout.h>
+#include <mmu.h>
+#include <memlayout.h>
 //#include <clock.h>
 #include <trap.h>
 #include <x86.h>
@@ -25,13 +25,11 @@ static void print_ticks() {
  * Must be built at run time because shifted function addresses can't
  * be represented in relocation records.
  * */
-//static struct gatedesc idt[256] = {{0}};
+static struct gatedesc idt[256] = {{0}};
 
-/*
- *static struct pseudodesc idt_pd = {
- *    sizeof(idt) - 1, (uintptr_t)idt
- *};
- */
+static struct pseudodesc idt_pd = {
+    sizeof(idt) - 1, (uintptr_t)idt
+};
 
 /* idt_init - initialize IDT to each of the entry points in kern/trap/vectors.S */
 void
@@ -48,6 +46,13 @@ idt_init(void) {
       *     You don't know the meaning of this instruction? just google it! and check the libs/x86.h to know more.
       *     Notice: the argument of lidt is idt_pd. try to find it!
       */
+    extern uintptr_t __vectors[];
+    //一共有256个门描述符.设置为中断门, 段选择符为内核代码段,内核态
+    int i = 0;
+    for(i = 0; i < sizeof(idt) / sizeof(struct gatedesc); ++i) {
+        SETGATE(idt[i],0, GD_KTEXT, __vectors[i], DPL_KERNEL);
+    }
+    lidt(&idt_pd);
 }
 
 static const char *
@@ -188,6 +193,7 @@ print_regs(struct pushregs *regs) {
  * */
 void
 trap(struct trapframe *tf) {
+    cprintf("Hominlinx");
     // dispatch based on what type of trap occurred
     //trap_dispatch(tf);
 }

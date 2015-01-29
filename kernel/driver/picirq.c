@@ -12,6 +12,7 @@
 static uint16_t irq_mask = 0xFFFF & ~(1 << IRQ_SLAVE);
 static bool bInit = 0;
 
+//OCW1是中断屏蔽字 , 0 允许中断, A0=1,
 static void pic_setmask(uint16_t mask) {
     irq_mask = mask;
     if(bInit) {
@@ -20,6 +21,7 @@ static void pic_setmask(uint16_t mask) {
     }
 }
 
+//使能某一个中断请求号,
 void pic_enable(uint32_t irq) {
     pic_setmask(irq_mask & ~(1 << irq));
 }
@@ -63,18 +65,17 @@ void pic_init(void) {
 
     //初始化后写入
     //工作方式编程 ocw2 ocw3 为偶地址A0 = 0 , 即 0x20 或0xA0
-    //屏蔽方式, 级联时用
-    // OCW3:  0ef01prs
-    //   ef:  0x = NOP, 10 = clear specific mask, 11 = set specific mask
-    //    p:  0 = no polling, 1 = polling mode
-    //   rs:  0x = NOP, 10 = read IRR, 11 = read ISR
+    //OCW3屏蔽方式, 级联时用, 三个功能, 设置或清除特殊屏蔽方式, 设置中断查询方式和读取寄存器的状态
+    // OCW3:  0ef01prs, D4D3=01, 表示OCW3
+    //   ef:  0x = NOP, 10 = clear specific mask, 11 = set specific mask ,改变优先级
+    //    p:  0 = no polling, 1 = polling mode ,查询方式位, 1表示查询
+    //   rs:  0x = NOP, 10 = read IRR, 11 = read ISR , 请求寄存器
     outb(IO_PIC1, 0x68);    // clear specific mask
-    outb(IO_PIC1, 0x0a);    // read IRR by default
+    outb(IO_PIC1, 0x0a);    // read IRR by default, 这个没有读,只是读IRR命令写入OCW3
 
     outb(IO_PIC2, 0x68);    // OCW3
     outb(IO_PIC2, 0x0a);    // OCW3
 
-    //OCW1是中断屏蔽字 , 0 允许中断
     if (irq_mask != 0xFFFF) {
         pic_setmask(irq_mask);
     }

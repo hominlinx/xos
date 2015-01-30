@@ -19,6 +19,7 @@ static void print_ticks() {
 #endif
 }
 
+interrupt_handle_t interrupt_handles[256];
 /* *
  * Interrupt descriptor table:
  *
@@ -53,6 +54,8 @@ idt_init(void) {
         SETGATE(idt[i],0, GD_KTEXT, __vectors[i], DPL_KERNEL);
     }
     lidt(&idt_pd);
+    //中断处理回调清零
+    memset(&interrupt_handles, 0, sizeof(interrupt_handle_t) * 256);
 }
 
 static const char *
@@ -186,6 +189,12 @@ print_regs(struct pushregs *regs) {
  *}
  */
 
+//注册一个中断处理回调函数
+void register_interrupt_handler(uint8_t num, interrupt_handle_t callback)
+{
+    interrupt_handles[num] = callback;
+}
+
 /* *
  * trap - handles or dispatches an exception/interrupt. if and when trap() returns,
  * the code in kern/trap/trapentry.S restores the old CPU state saved in the
@@ -193,7 +202,13 @@ print_regs(struct pushregs *regs) {
  * */
 void
 trap(struct trapframe *tf) {
-    cprintf("Hominlinx");
+    if (interrupt_handles[tf->tf_trapno] != NULL) {
+        interrupt_handles[tf->tf_trapno](tf);
+    }
+    else
+    {
+        cprintf("Unhandled interrupt:%d errorCode:%d\n", tf->tf_trapno, tf->tf_err);
+    }
     // dispatch based on what type of trap occurred
     //trap_dispatch(tf);
 }

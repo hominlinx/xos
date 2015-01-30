@@ -176,16 +176,14 @@ static void cga_putc(int8_t c, real_color_t back, real_color_t fore)
 
 	// 如果需要的话滚动屏幕显示
     // What is the purpose of this?
-    /*
-     *if (crt_pos >= CRT_SIZE) {
-     *    int i;
-     *    memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
-     *    for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i ++) {
-     *        crt_buf[i] = 0x0700 | ' ';
-     *    }
-     *    crt_pos -= CRT_COLS;
-     *}
-     */
+    if (crt_pos >= CRT_SIZE) {
+        int i;
+        memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
+        for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i ++) {
+            crt_buf[i] = 0x0700 | ' ';
+        }
+        crt_pos -= CRT_COLS;
+    }
 
 	// 移动硬件的输入光标
     // move that little blinky thing

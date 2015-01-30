@@ -82,6 +82,9 @@ struct trapframe {
     uint16_t tf_padding5;
 } __attribute__((packed));
 
+//the handle of interrupt
+typedef void (*interrupt_handle_t)(struct trapframe* tf);
+void register_interrupt_handler(uint8_t num, interrupt_handle_t callback);
 void idt_init(void);
 void print_trapframe(struct trapframe *tf);
 void print_regs(struct pushregs *regs);

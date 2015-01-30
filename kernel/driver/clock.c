@@ -18,9 +18,16 @@
 #define TIMER_SEL0      0x00                    // select counter 0
 #define TIMER_RATEGEN   0x04                    // mode 2, rate generator
 #define TIMER_16BIT     0x30                    // r/w counter 16 bits, LSB first
+#define TICK_NUM 100
 
 volatile size_t ticks;
 
+void clock_callback(struct trapframe* tf) {
+    ticks++;
+    if (ticks % TICK_NUM == 0) {
+        cprintf("now ticks:%d\n", ticks);
+    }
+}
 void clock_init(void) {
     //设置8253
     outb(TIMER_MODE, TIMER_SEL0 | TIMER_RATEGEN | TIMER_16BIT);
@@ -29,6 +36,7 @@ void clock_init(void) {
 
     ticks = 0;
 
+    register_interrupt_handler(IRQ_OFFSET + IRQ_TIMER, clock_callback);
     cprintf("== setup timer interrupts\n");
     pic_enable(IRQ_TIMER); //使能中断请求号
 }

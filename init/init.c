@@ -12,15 +12,17 @@ void kernel_init(void)
     cons_init();
     //cons_putc('c', rc_black, rc_green);
     print_kerninfo();
+    cprintf("hominlinx %s", "and shelly");
     //grade_backtrace();
     //初始化物理内存管理
-    pmm_init();
+
+    //pmm_init();
     //中断初始化
-    pic_init();
+    //pic_init();
     //中断描述符初始化
-    idt_init();
-    clock_init();
-    intr_enable();
+    //idt_init();
+    //clock_init();
+    //intr_enable();
     cprintf("hominlinx %s", "and shelly");
     while(1);
 }

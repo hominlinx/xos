@@ -8,11 +8,11 @@
 
 OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
 OUTPUT_ARCH(i386)
-ENTRY(kernel_init)
+ENTRY(kernel_entry)
 SECTIONS
 {
-    /* 定位器符号置为0x100000 */
-    . = 0x100000;
+    /* 定位器符号置为0xC0100000 */
+    . = 0xC0100000;
 
     /* 将所有输入文件的.text , .stub等段合并为一个.text段,该段的起始地址有定位器决定, 即为0x100000 */
     .text :

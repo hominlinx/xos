@@ -139,7 +139,7 @@ bootblock = $(call totarget,bootblock)
 
 $(bootblock): $(call toobj,$(bootfiles)) | $(call totarget,sign)
 	@echo Hominlinx $(bootfiles) $^ $(call totarget, bootblock) $(call toobj, $(bootfiles))
-	$(V)$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 $^ -o $(call toobj,bootblock)
+	$(V)$(LD) $(LDFLAGS) -N -T tools/boot.ld $^ -o $(call toobj,bootblock)
 	$(V) @$(OBJDUMP) -S $(call objfile,bootblock) > $(call asmfile,bootblock)
 	$(V) @$(OBJCOPY) -S -O binary $(call objfile,bootblock) $(call outfile,bootblock)
 	@echo + ld $^ $(call outfile, bootblock) $(bootblock)

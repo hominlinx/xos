@@ -10,6 +10,7 @@
 .set PROT_MODE_DSEG,        0x10                    # kernel data segment selector
 #保护模式使能标志
 .set CR0_PE_ON,             0x1                     # protected mode enable flag
+.set SMAP,                  0x534d4150
 
 .globl start
 start:
@@ -41,6 +42,26 @@ seta20.2:
 
     movb $0xdf, %al                                 # 0xdf -> port 0x60
     outb %al, $0x60                                 # 0xdf = 11011111, means set P2's A20 bit(the 1 bit) to 1
+
+#探测内存,暂时不研究
+probe_memory:
+    movl $0, 0x8000
+    xorl %ebx, %ebx
+    movw $0x8004, %di
+start_probe:
+    movl $0xE820, %eax
+    movl $20, %ecx
+    movl $SMAP, %edx
+    int $0x15
+    jnc cont
+    movw $12345, 0x8000
+    jmp finish_probe
+cont:
+    addw $20, %di
+    incl 0x8000
+    cmpl $0, %ebx
+    jnz start_probe
+finish_probe:
 
     #设置gdtr
     #将全局描述符表描述符加载到全局描述符表寄存器

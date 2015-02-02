@@ -68,6 +68,38 @@
 #define KSTACKPAGE          2                           // # of pages in kernel stack
 #define KSTACKSIZE          (KSTACKPAGE * PGSIZE)       // sizeof kernel stack
 
+#ifndef __ASSEMBLER__
+#include <defs.h>
+//#include <list.h>
+
+//page table entry
+typedef uintptr_t pte_t;
+//page directory entry
+typedef uintptr_t pde_t;
+
+//some constants for bios interrupt 15h AX = 0xE820
+//
+//
+#define E820MAX   20 //max num of entries in E820MAP
+#define E820_ARM 1
+#define E820_ARR 2
+/*
+ * nr_map 是内存段的数量
+ * 每个内存段由e820entry 表示
+ * addr 表示内存段的起始地址
+ * size表示内存段的大小
+ * type表示内存段的类型, E820_ARM 表示可用内存, E820MAX是一个宏，为20，说明最多可以有20个内存段
+ */
+struct e820map {
+    uint32_t nr_map;
+    struct e820entry {
+        uint64_t addr;
+        uint64_t size;
+        uint32_t type;
+    } __attribute__((packed)) map[E820MAX];
+};
+
+#endif
 
 #endif /* !__KERN_MM_MEMLAYOUT_H__ */
 

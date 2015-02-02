@@ -46,6 +46,9 @@ typedef size_t ppn_t;
         })
 
 /* Round up to the nearest multiple of n */
+//一个数学函数，它总是尝试找到大于a并接近a的可以整除n的那个数，也即向上圆整。
+//比如ROUNUP(3, 4096) = 4096
+//ROUNDUP(5000, 4096) = 4096*2
 #define ROUNDUP(a, n) ({                                            \
             size_t __n = (size_t)(n);                               \
             (typeof(a))(ROUNDDOWN((size_t)(a) + __n - 1, __n));     \

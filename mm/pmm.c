@@ -26,6 +26,10 @@
  * */
 static struct taskstate ts = {0};
 
+//page组
+struct Page *pages;
+//amount of 物理内存
+size_t npage = 0;
 /* *
  * Global Descriptor Table:
  *
@@ -92,8 +96,35 @@ gdt_init(void) {
 }
 
 /* pmm_init - initialize the physical memory management */
+static void
+page_init(void) {
+    struct e820map *memmap = (struct e820map *)(0x8000 + KERNBASE);
+    uint64_t maxpa = 0;
+    cprintf("e820map: nrmap[%d]\n", memmap->nr_map);
+    int i;
+    for (i = 0; i < memmap->nr_map; ++i) {
+        uint64_t begin = memmap->map[i].addr, end = begin + memmap->map[i].size;
+        //cprintf(" memory: %08lld, [%08llx, %08llx], type = %d. \n",
+        //    (memmap->map[i].size/1024), begin, end - 1, memmap->map[i].type);
+        cprintf(" memory: %08llx, [%08llx, %08llx], type = %d. \n",
+            (memmap->map[i].size), begin, end - 1, memmap->map[i].type);
+        if (memmap->map[i].type == E820_ARM) {
+            if (maxpa < end && begin < KERNBASE) {
+                maxpa = end;
+            }
+        }
+    }
+    if (maxpa > KERNBASE) {
+        maxpa = KERNBASE;
+    }
+    extern char end[];
+    npage = maxpa / PGSIZE;
+    pages = (struct Page *)ROUNDUP((void *)end, PGSIZE);
+    cprintf("maxpa = %08llx, 物理页数:%d, %d end[%p]\n", maxpa, maxpa / PGSIZE, pages, (int)(end));
+}
 void
 pmm_init(void) {
-    gdt_init();
+    page_init();
+    //gdt_init();
 }
 

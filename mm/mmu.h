@@ -198,6 +198,11 @@ struct taskstate {
 //  \--- PDX(la) --/ \--- PTX(la) --/ \---- PGOFF(la) ----/
 //  \----------- PPN(la) -----------/
 //
+//  -----               -----               -----
+//  |   |               |   |               |   |
+//  |   |               |---|PTE            |---|
+//  |---|               |   |               |   |
+//  |---|               |---|               |---|
 // The PDX, PTX, PGOFF, and PPN macros decompose linear addresses as shown.
 // To construct a linear address la from PDX(la), PTX(la), and PGOFF(la),
 // use PGADDR(PDX(la), PTX(la), PGOFF(la)).
@@ -205,12 +210,13 @@ struct taskstate {
 // page directory index
 #define PDX(la) ((((uintptr_t)(la))  >> PDXSHIFT) & 0x3ff)
 
-//通过线性地址得到页表
+//通过线性地址得到页表的偏移
 // page table index
 #define PTX(la) ((((uintptr_t)(la)) >> PTXSHIFT) & 0x3FF)
 
-//通过线性地址得到页
-// page number field of address
+//物理存储器的页号, 参考＜深入理解计算机系统＞ｐ543
+//物理地址地址和PPN一一对应
+// page number field of address , la应该是物理地址
 #define PPN(la) (((uintptr_t)(la)) >> PTXSHIFT)
 
 //得到页内偏移
@@ -221,13 +227,14 @@ struct taskstate {
 // construct linear address from indexes and offset
 #define PGADDR(d, t, o) ((uintptr_t)((d) << PDXSHIFT | (t) << PTXSHIFT | (o)))
 
-//取得页表相的物理地址, 指向物理页面的首地址
+//取得页表项的物理地址,指向页的基地址
 #define PTE_ADDR(pte) ((uintptr_t)(pte) & ~0xFFF)
+//取得页目录相的物理地址, 指向页表相的首地址
+#define PDE_ADDR(pde) PTE_ADDR(pde)
 
 /* page directory and page table constants */
 #define NPDEENTRY       1024                    // page directory entries per page directory
 #define NPTEENTRY       1024                    // page table entries per page table
-
 #define PGSIZE          4096                    // bytes mapped by a page
 #define PGSHIFT         12                      // log2(PGSIZE)
 #define PTSIZE          (PGSIZE * NPTEENTRY)    // bytes mapped by a page directory entry

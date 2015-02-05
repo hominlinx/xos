@@ -3,6 +3,7 @@
 #include <mmu.h>
 #include <memlayout.h>
 #include <pmm.h>
+#include <sync.h>
 
 /* *
  * Task State Segment:
@@ -26,10 +27,17 @@
  * */
 static struct taskstate ts = {0};
 
-//page组
+//page组, 指向物理页的首页
 struct Page *pages;
-//amount of 物理内存
+//amount of 物理内存页数
 size_t npage = 0;
+
+//boot_pgdir是表示一个页目录, pde_t是一个物理地址类型
+pde_t *boot_pgdir = NULL;
+uintptr_t boot_cr3;
+
+const struct pmm_manager *pmm_manager;
+
 /* *
  * Global Descriptor Table:
  *
@@ -94,6 +102,39 @@ gdt_init(void) {
     // load the TSS
     ltr(GD_TSS);
 }
+/* *
+ * load_esp0 - change the ESP0 in default task state segment,
+ * so that we can use different kernel stack when we trap frame
+ * user to kernel.
+ * */
+void
+load_esp0(uintptr_t esp0) {
+    ts.ts_esp0 = esp0;
+}
+
+/*
+ * now , page manager begin
+ */
+static void init_pmm_manager() {
+
+}
+
+//init_memmap
+static void init_memmap(struct Page *page, size_t n) {
+    pmm_manager->init_memmap(page, n);
+}
+
+//alloc_pages
+struct Page *alloc_pages(size_t n) {
+    struct Page *page = NULL;
+    bool intr_flag;
+    local_intr_save(intr_flag);
+    {
+        page = pmm_manager->alloc_pages(n);
+    }
+    local_intr_restore(intr_flag);
+    return page;
+}
 
 /* pmm_init - initialize the physical memory management */
 static void
@@ -106,7 +147,7 @@ page_init(void) {
         uint64_t begin = memmap->map[i].addr, end = begin + memmap->map[i].size;
         //cprintf(" memory: %08lld, [%08llx, %08llx], type = %d. \n",
         //    (memmap->map[i].size/1024), begin, end - 1, memmap->map[i].type);
-        cprintf(" memory: %08llx, [%08llx, %08llx], type = %d. \n",
+        cprintf("page_init--> memory: size(%08llx), [%08llx, %08llx], type = %d. \n",
             (memmap->map[i].size), begin, end - 1, memmap->map[i].type);
         if (memmap->map[i].type == E820_ARM) {
             if (maxpa < end && begin < KERNBASE) {
@@ -120,7 +161,34 @@ page_init(void) {
     extern char end[];
     npage = maxpa / PGSIZE;
     pages = (struct Page *)ROUNDUP((void *)end, PGSIZE);
-    cprintf("maxpa = %08llx, 物理页数:%d, %d end[%p]\n", maxpa, maxpa / PGSIZE, pages, (int)(end));
+    //将所有页设为不能用
+    for(i = 0; i < npage; ++i) {
+        SetPageReserved(pages + i);
+    }
+
+    //得到虚拟地址，在页机制之前，虚拟地址与物理地址之间相差KERNBASE, pages 是虚拟地址，但它指向的是物理地址的值，freemem是物理地址空间的
+    uintptr_t freemem = PADDR((uintptr_t)pages + sizeof(struct Page) * npage);
+    cprintf("page_init-->maxpa = %08llx, physical pages num:%d,freemem[%p] pages[%p] end[%p]\n", maxpa, npage, freemem, pages, (int)(end));
+    for(i = 0; i < memmap->nr_map; ++i) {
+        uint64_t begin = memmap->map[i].addr, end = begin + memmap->map[i].size;
+        if (memmap->map[i].type == E820_ARM) {
+            if (begin < freemem) {
+                begin = freemem;
+            }
+            if (end > KMEMSIZE) {
+                end = KMEMSIZE;
+            }
+            if (begin < end) {
+                cprintf("page_init-->begin[%p], end[%p]\n", begin, end);
+                begin = ROUNDUP(begin, PGSIZE);
+                end = ROUNDDOWN(end, PGSIZE);
+                cprintf("page_init-->begin[%p], end[%p]\n", begin, end);
+                if (begin < end) {
+                    //init_memmap(pa2page(begin), (end - begin)/PGSIZE);
+                }
+            }
+        }
+    }
 }
 void
 pmm_init(void) {

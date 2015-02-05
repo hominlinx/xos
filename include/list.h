@@ -25,7 +25,7 @@ static inline list_entry_t *list_next(list_entry_t *listelm) __attribute__((alwa
 static inline list_entry_t *list_prev(list_entry_t *listelm) __attribute__((always_inline));
 
 static inline void __list_add(list_entry_t *elm, list_entry_t *prev, list_entry_t *next) __attribute__((always_inline));
-static inline void __list_del(list_entry_t *prev, list_entry_t *next) __attribute__(always_inline);
+static inline void __list_del(list_entry_t *prev, list_entry_t *next) __attribute__((always_inline));
 
 /*
  * list_init 初始化list， elm是初始化后的一个list头

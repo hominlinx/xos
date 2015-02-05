@@ -63,6 +63,7 @@
  * table, which maps all the PTEs (Page Table Entry) containing the page mappings
  * for the entire virtual address space into that 4 Meg region starting at VPT.
  * */
+//用户虚拟页表Virtual Page Table，大小为PTSIZE，这个是内核使用的
 #define VPT                 0xFAC00000
 
 #define KSTACKPAGE          2                           // # of pages in kernel stack
@@ -70,7 +71,8 @@
 
 #ifndef __ASSEMBLER__
 #include <defs.h>
-//#include <list.h>
+#include <list.h>
+#include <atomic.h>
 
 //page table entry
 typedef uintptr_t pte_t;
@@ -98,6 +100,37 @@ struct e820map {
         uint32_t type;
     } __attribute__((packed)) map[E820MAX];
 };
+
+/*
+ * Page结构体，　描述物理页，也叫页帧，现在每页是４ｋ
+ */
+struct Page {
+    int ref; //页面被引用的次数
+    uint32_t flags; //
+    uint32_t property; //the number of free block;不是每个页面都用这个属性
+    list_entry_t page_link; //free list link
+};
+
+/* Flags describing the status of a page frame */
+#define PG_reserved                 0       // the page descriptor is reserved for kernel or unusable
+#define PG_property                 1       // the member 'property' is valid
+
+#define SetPageReserved(page)       set_bit(PG_reserved, &((page)->flags))
+#define ClearPageReserved(page)     clear_bit(PG_reserved, &((page)->flags))
+#define PageReserved(page)          test_bit(PG_reserved, &((page)->flags))
+#define SetPageProperty(page)       set_bit(PG_property, &((page)->flags))
+#define ClearPageProperty(page)     clear_bit(PG_property, &((page)->flags))
+#define PageProperty(page)          test_bit(PG_property, &((page)->flags))
+
+// convert list entry to page
+#define le2page(le, member)                 \
+    to_struct((le), struct Page, member)
+
+/* free_area_t - maintains a doubly linked list to record free (unused) pages */
+typedef struct {
+    list_entry_t free_list;         // the list header
+    unsigned int nr_free;           // # of free pages in this free list
+} free_area_t;
 
 #endif
 

@@ -6,6 +6,7 @@
 #include "console.h"
 #include "x86.h"
 #include "kbdreg.h"
+#include "memlayout.h"
 
 //延迟
 static void
@@ -134,8 +135,8 @@ serial_intr(void) {
 #define CRT_COLS        80
 #define CRT_SIZE        (CRT_ROWS * CRT_COLS)
 // VGA 的显示缓冲的起点是 0xB8000
-static uint16_t *video_memory = (uint16_t*)CGA_BUF;
-static uint16_t *crt_buf = (uint16_t*)CGA_BUF;
+static uint16_t *video_memory = (uint16_t*)(CGA_BUF + KERNBASE);
+static uint16_t *crt_buf = (uint16_t*)(CGA_BUF + KERNBASE);
 static uint16_t crt_pos;
 static uint16_t addr_6845 = CGA_BASE;
 
@@ -211,7 +212,7 @@ cons_init(void) {
     serial_init();
     kbd_init();
     if (!serial_exists) {
-        //cprintf("serial port does not exist!!\n");
+        cprintf("serial port does not exist!!\n");
     }
 }
 /* cons_putc - print a single character @c to console devices */

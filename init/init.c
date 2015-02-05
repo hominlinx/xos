@@ -23,7 +23,7 @@ void kernel_init(void)
     //idt_init();
     //clock_init();
     //intr_enable();
-    cprintf("hominlinx %s", "and shelly");
+    //cprintf("hominlinx %s", "and shelly");
     while(1);
 }
 

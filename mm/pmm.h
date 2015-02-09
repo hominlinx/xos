@@ -41,7 +41,8 @@ size_t num_free_pages(void);
 //返回的虚拟地址指向的二级页表项
 pte_t *get_pte(pde_t *pgdir, uintptr_t la, bool create);
 struct Page *get_page(pde_t *pgdir, uintptr_t la, pte_t **ptep_store);
-void page_remove(pde_t *pgdir, struct Page *page, uintptr_t la, uint32_t perm);
+void page_remove(pde_t *pgdir, uintptr_t la);
+int page_insert(pde_t *pgdir, struct Page *page, uintptr_t la, uint32_t perm);
 
 void load_esp0(uintptr_t esp0);
 void tlb_invalidate(pde_t *pgdir, uintptr_t la);
@@ -74,22 +75,58 @@ void print_pgdir(void);
 extern struct Page *pages; //pages指向了物理页的首页
 extern size_t npage; //一共多少个物理页
 
-//从一个物理页得到对应的一个物理地址，
-static inline physaddr_t page2ppn(struct Page *page) {
+//从一个页得到对应的一个物理地址
+static inline physaddr_t page2pa(struct Page *page) {
     return (page - pages) << PGSHIFT;
 }
 
 //计算一个物理地址对应的页面
+//比如pa = [0x1b7000], PPN(pa) = 0x1b7, 这个值除以sizeof(struct Page) 就是距离pages（0xC0117000)的大小，所以得到Page* 是0xc011924c
 static inline struct Page* pa2page(physaddr_t pa) {
     if(PPN(pa) >= npage) {
         panic("pa2page called with invalid pa");
     }
+    cprintf("pa2page:pa[%p] PPN[%p] page[%p] pa[%p]\n", pa, PPN(pa), &pages[PPN(pa)], page2pa(&pages[PPN(pa)]));
     return &pages[PPN(pa)];
 }
 
 //把一个页面转换成虚拟地址，这个是在页机制之前
 static inline void * page2kva(struct Page *page) {
     return KADDR(page2pa(page));
+}
+
+static inline struct Page *pte2page(pte_t pte) {
+    if (!(pte & PTE_P)) {
+        panic("pte2page called with invalid pte");
+    }
+    return pa2page(PTE_ADDR(pte));
+}
+
+static inline struct Page *
+pde2page(pde_t pde) {
+    return pa2page(PDE_ADDR(pde));
+}
+
+static inline int
+page_ref(struct Page *page) {
+    return page->ref;
+}
+
+static inline void
+set_page_ref(struct Page *page, int val) {
+    page->ref = val;
+}
+
+static inline int
+page_ref_inc(struct Page *page) {
+    page->ref += 1;
+    return page->ref;
+}
+
+static inline int
+page_ref_dec(struct Page *page) {
+    page->ref -= 1;
+    return page->ref;
 }
 
 

@@ -13,7 +13,19 @@ static void default_init() {
 }
 
 static void default_init_memmap(struct Page *base, size_t n) {
-
+    assert(n > 0);
+    struct Page *p = base; //估计base 是：0xc011924c，也就是pa[0x1b7000]对应的页．
+    for (; p != base + n; ++p) {
+        assert(PageReserved(p));
+        p->flags = 0;
+        SetPageProperty(p);
+        p->property = 0;
+        set_page_ref(p, 0);
+        list_add_before(&free_list, &(p->page_link));
+    }
+    //for循环完成后，free_list成为了这个链表的头，此刻有ｎ个节点
+    nr_free += n;
+    base->property = n;
 }
 
 static struct Page *default_alloc_pages(size_t n) {

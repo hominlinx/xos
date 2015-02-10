@@ -185,6 +185,7 @@ page_init(void) {
         maxpa = KERNBASE;
     }
     extern char end[];
+    //这个页数可能是个ｂｕｇ，　不过没关系　，　大点就大点＾＾
     npage = maxpa / PGSIZE;
     pages = (struct Page *)ROUNDUP((void *)end, PGSIZE);
     cprintf("page_init -->pages[%p], npage[%d]\n", pages, npage);
@@ -197,21 +198,21 @@ page_init(void) {
     uintptr_t freemem = PADDR((uintptr_t)pages + sizeof(struct Page) * npage);
     cprintf("page_init-->maxpa = %08llx, physical pages num:%d,freemem[%p] pages[%p] end[%p]\n", maxpa, npage, freemem, pages, (int)(end));
     for(i = 0; i < memmap->nr_map; ++i) {
-        uint64_t begin = memmap->map[i].addr, end = begin + memmap->map[i].size;
+        uint64_t begin = memmap->map[i].addr, ender = begin + memmap->map[i].size;
         if (memmap->map[i].type == E820_ARM) {
             if (begin < freemem) {
                 begin = freemem;
             }
-            if (end > KMEMSIZE) {
-                end = KMEMSIZE;
+            if (ender > KMEMSIZE) {
+                ender = KMEMSIZE;
             }
-            if (begin < end) {
-                //cprintf("page_init-->begin[%p], end[%p]\n", begin, end);
+            if (begin < ender) {
+                cprintf("page_init-->begin[%08llx], end[%08llx]\n", begin, ender);
                 begin = ROUNDUP(begin, PGSIZE);
-                end = ROUNDDOWN(end, PGSIZE);
-                //cprintf("page_init-->begin[%p], end[%p]\n", begin, end);
-                if (begin < end) {
-                    init_memmap(pa2page(begin), (end - begin)/PGSIZE);
+                ender = ROUNDDOWN(ender, PGSIZE);
+                cprintf("page_init-->begin[%08llx], end[%08llx]\n", begin, ender);
+                if (begin < ender) {
+                    init_memmap(pa2page(begin), (ender - begin)/PGSIZE);
                 }
             }
         }
@@ -495,6 +496,7 @@ pmm_init(void) {
     init_pmm_manager();
     page_init();
     //gdt_init();
+    check_alloc_page();
     boot_pgdir = boot_alloc_page();
     boot_map_segment(boot_pgdir, KERNBASE, KMEMSIZE, 0, PTE_W);
 }

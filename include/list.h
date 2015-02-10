@@ -43,6 +43,7 @@ static inline void list_add(list_entry_t *listelm, list_entry_t *elm) {
 
 /*
  * list_add_before 添加一个元素，listelm 为以前的链表头。
+ * 也就是在listelm这个链表的尾巴处加入一个节点
  */
 static inline void list_add_before(list_entry_t *listelm, list_entry_t *elm) {
     __list_add(elm, listelm->prev, listelm);
@@ -50,6 +51,7 @@ static inline void list_add_before(list_entry_t *listelm, list_entry_t *elm) {
 
 /*
  * list_add_after 添加一个元素
+ * 也就是在listelm这个链表的头处加入一个节点．
  */
 static inline void list_add_after(list_entry_t *listelm, list_entry_t *elm) {
     __list_add(elm, listelm, listelm->next);

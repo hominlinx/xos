@@ -75,7 +75,7 @@ void print_pgdir(void);
 extern struct Page *pages; //pages指向了物理页的首页
 extern size_t npage; //一共多少个物理页
 
-//从一个页得到对应的一个物理地址
+//从一个页得到对应的一个物理地址, 这个ｐａｇｅ页与ｐａｇｅｓ相减是sizeof(struct Page)的整数倍．
 static inline physaddr_t page2pa(struct Page *page) {
     return (page - pages) << PGSHIFT;
 }
@@ -86,7 +86,7 @@ static inline struct Page* pa2page(physaddr_t pa) {
     if(PPN(pa) >= npage) {
         panic("pa2page called with invalid pa");
     }
-    cprintf("pa2page:pa[%p] PPN[%p] page[%p] pa[%p]\n", pa, PPN(pa), &pages[PPN(pa)], page2pa(&pages[PPN(pa)]));
+    //cprintf("pa2page:pa[%p] PPN[%p] page[%p] pa[%p]\n", pa, PPN(pa), &pages[PPN(pa)], page2pa(&pages[PPN(pa)]));
     return &pages[PPN(pa)];
 }
 

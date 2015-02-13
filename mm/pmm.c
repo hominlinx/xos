@@ -234,7 +234,7 @@ static void enable_paging(void) {
  * pgdir 约为0xc01b9000，　la[0xc0000000] size[0x38000000], pa[0x0] perm[0x2]，　共８９６Ｍ, 229376页, 这些页占据了最低位置的内存，但是在ｐｇｄｉｒ之上，因为ｐｇｄｉｒ占据了４ｋ，所以下面代码中ｐｔｅｐ依次存储在0xc01ba000的虚拟地址中，当然有了这个地址转到物理很方便, 因为执行这个代码时还在页机制之前
  */
 static void boot_map_segment(pde_t *pgdir, uintptr_t la, size_t size, uintptr_t pa, uint32_t perm) {
-    cprintf("Hominlinx-->boot_map_segment: pgdir[%p],la[%p] size[%p], pa[%p] perm[%p]", pgdir, la, size, pa, perm);
+    cprintf("Hominlinx-->boot_map_segment: pgdir[%p] *pgdir[%p],la[%p] size[%p], pa[%p] perm[%p]", pgdir, *pgdir, la, size, pa, perm);
     //页内偏移必须一样
     assert(PGOFF(la) == PGOFF(pa));
     size_t n = ROUNDUP(size + PGOFF(la), PGSIZE) / PGSIZE;
@@ -252,7 +252,8 @@ static void *boot_alloc_page() {
     if (p == NULL) {
         panic("boot_alloc_page failed.\n");
     }
-    cprintf("hominlinx-->boot_alloc_page::page[%p] *page[%p], pa[%p]\n", p, *p, page2pa(p));
+    cprintf("hominlinx-->boot_alloc_page::page[%p] *page[%p], pa[%p] kva[%p]\n", p, *p, page2pa(p), page2kva(p));
+    cprintf("Hominlinx-->boot_alloc_page:%p->%p-->%p-->%d\n", page2kva(p), p, page2pa(p), (p)->property);
     return page2kva(p);
 }
 /*
@@ -498,6 +499,7 @@ pmm_init(void) {
     //gdt_init();
     check_alloc_page();
     boot_pgdir = boot_alloc_page();
+    cprintf("Hominlinx-->pmm_init, boot_pgdir[%p]\n", boot_pgdir);
     boot_map_segment(boot_pgdir, KERNBASE, KMEMSIZE, 0, PTE_W);
 }
 

@@ -33,11 +33,35 @@ static struct Page *default_alloc_pages(size_t n) {
     if (n > nr_free) {
         return NULL;
     }
+    list_entry_t *le, *len;
+    le = &free_list;
+    //from head to end
+    while((le = list_next(le)) != &free_list) {
+        struct Page *p = le2page(le, page_link);
+        if(p->property >= n) {
+            int i;
+            for(i = 0; i < n; ++i) {
+                len = list_next(le);
+                struct Page *pp = le2page(le, page_link);
+                SetPageReserved(pp);
+                ClearPageProperty(pp);
+                list_del(le);
+                le = len;
+            }
+            if(p->property > n) {
+                (le2page(le, page_link))->property = p->property - n;
+            }
+        ClearPageProperty(p);
+        SetPageReserved(p);
+        nr_free -= n;
+        return p;
+        }
+    }
     return NULL;
 }
 
 static void default_free_pages(struct Page *base, size_t n) {
-    
+
 }
 
 static size_t default_nr_free_pages(void) {
@@ -45,7 +69,7 @@ static size_t default_nr_free_pages(void) {
 }
 
 static void basic_check(void) {
-    
+
 }
 
 static void default_check() {

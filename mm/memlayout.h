@@ -112,6 +112,10 @@ struct Page {
 };
 
 /* Flags describing the status of a page frame */
+//bit 0表示此页是否被保留(reserved),如果是被保留的页,则
+//bit 0会设置为1,且不能放到空闲页链表中,即这样的页不是空闲页,不能动态分配与释放。比如目前内核代码占用的空间就
+//属于这样“被保留”的页。在本实验中,bit 1表示此页是否是free的,如果设置为1,表示这页是free的,可以被分配;如果设
+//置为0,表示这页已经被分配出去了,不能被再二次分配。
 #define PG_reserved                 0       // the page descriptor is reserved for kernel or unusable
 #define PG_property                 1       // the member 'property' is valid
 
